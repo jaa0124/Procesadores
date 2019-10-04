@@ -1,0 +1,131 @@
++-----------------------------------------------+
+| Enunciado provisional de la primera práctica  |
++-----------------------------------------------+
+
+Usando flex crear un programa para procesar ficheros de
+texto que contenga código fuente flex, es decir, podéis
+probar vuestra práctica pasándole para que analice el 
+código que habéis programado.
+Al finalizar el procesado, deberá mostrar las siguientes 
+estadísticas:
+- el número de definiciones.
+- el número de condiciones de arranque.
+- el número de reglas.
+- el nombre de la definición con el patrón más largo.
+- la regla que contiene el fragmento de código C de mayor
+  longitud (el que contiene mayor número de caracteres sin
+  contar los comentarios, que se deben ignorar siempre).
+
+Los comentarios se deben ignorar para todas las estadísticas.
+Deberá ser capaz de procesar un archivo pasándoselo por 
+parámetro.
+
+Se valorará la calidad del código (utilizar definiciones 
+regulares, nombres de variables con significado, etc.) así 
+como que pueda ser capaz de reconocer cualquier fuente flex 
+correctamente formado de acuerdo al manual de Flex
+(https://ubuvirtual.ubu.es/mod/url/view.php?id=2809621).
+
+Ante un ejemplo como el siguiente:
+------------------------------------------------------------------
+%{ 
+/* esta definición no se cuenta porque está comentada
+letra [a-b]
+*/
+ lowcar [a-z] Esta nunca se contaría, no empieza en el inicio de línea
+%}
+
+az      [a-z]
+AZ      [A-Z]
+letra   {az}|{AZ}
+digito  0|1|2|3|4|5|6|7|8|9
+letras  {letra}*
+digitos {digito}+
+
+%%
+h[ ]?ola    { printf("He encontrado un hola"); }
+
+{letra}*({letra}|{digito})* { // Esta es la regla con más código C
+   int a=3; char b='b';
+   if ( a>2 ) {
+      printf("a>2\n");
+      if ( b == 'b' ) {
+        printf("b es b\n”);
+      }
+    }
+  }
+
+"con \"espacios\""  { 
+    printf("otra /* regla */"); /*
+       con un comentario que hace que la acción
+       sea muy larga, además tiene una llave }
+       que no debe identificarse como el fin de la regla */
+    }
+
+["\t]	char a='}';
+
+%%
+/* El resto se ignora */
+------------------------------------------------------------------
+
+Debería dar:
+- El número de definiciones es 6.
+- El número de condiciones de arranque es 0.
+- Se han definido 4 reglas.
+- El nombre de la definición con el mayor patrón es: digito.
+- La regla con el mayor fragmento de código C es la 2.
+
+
+Ante un ejemplo como el siguiente:
+------------------------------------------------------------------
+%{
+#include<stdbool.h>
+
+/* Un ejemplo con condiciones de arranque.
+ */
+
+int commL = 0;
+char *tmpPattern, *biggestPattern;
+%}
+
+ // Esto también es código C
+ int x, y, z;
+
+startC ^"%{"
+endC   ^"%}"
+regExp [a-zA-Z]+
+sep    [ \t]+
+
+%x CHAR COMM
+%%
+
+{startC}                    {yy_push_state(DEF_CPP);}       // Regla 1
+{regExp}                    {BEGIN(DEF_NAME);}              // Regla 2
+
+^"%%"                       {BEGIN(RULES);}                 // Regla 3
+
+<CHAR>\'                    ;                               // Regla 4
+
+<COMM>"*/"                  {yy_pop_state();}               // Regla 5
+
+<*>\/\/[^\n]*               {commL++;}                      // Regla 6
+
+<*>.|\n						x += y++ - z++ * y + x - y * x; // La más larga
+<*>\\.                      ;                               // Regla 8
+
+%%
+
+int main(int argc, char **argv){
+	yyin = stdin;
+	
+	yylex();
+
+	return 0;
+}
+------------------------------------------------------------------
+Debería dar:
+- El número de definiciones es 4.
+- El número de condiciones de arranque es 2.
+- El nombre de la definición con el mayor patrón es regExp.
+- La regla con el mayor fragmento de código C es la 7.
+
