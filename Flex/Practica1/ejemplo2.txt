@@ -1,0 +1,44 @@
+%{
+#include<stdbool.h>
+
+/* Un ejemplo con condiciones de arranque.
+ */
+
+int commL = 0;
+char *tmpPattern, *biggestPattern;
+%}
+
+ // Esto también es código C
+ int x, y, z;
+
+startC ^"%{"
+endC   ^"%}"
+regExp [a-zA-Z]+
+sep    [ \t]+
+
+%x CHAR COMM
+%%
+
+{startC}                    {yy_push_state(DEF_CPP);}       // Regla 1
+{regExp}                    {BEGIN(DEF_NAME);}              // Regla 2
+
+^"%%"                       {BEGIN(RULES);}                 // Regla 3
+
+<CHAR>\'                    ;                               // Regla 4
+
+<COMM>"*/"                  {yy_pop_state();}               // Regla 5
+
+<*>\/\/[^\n]*               {commL++;}                      // Regla 6
+
+<*>.|\n						x += y++ - z++ * y + x - y * x; // La más larga
+<*>\\.                      ;                               // Regla 8
+
+%%
+
+int main(int argc, char **argv){
+	yyin = stdin;
+	
+	yylex();
+
+	return 0;
+}
