@@ -16,20 +16,20 @@ digitos {digito}+
 h[ ]?ola    { printf("He encontrado un hola"); }
 
 {letra}*({letra}|{digito})* { // Esta es la regla con más código C
-   int a=3; char b='b';
-   if ( a>2 ) {
-      printf("a>2\n");
-      if ( b == 'b' ) {
-        printf("b es b\n”);
-      }
-    }
+                            int a=3; char b='b';
+                            if ( a>2 ) {
+                              printf("a>2\n");
+                              if ( b == 'b' ) {
+                                printf("b es b\n”);
+                              }
+                            }
   }
 
 "con \"espacios\""  { 
-    printf("otra /* regla */"); /*
-       con un comentario que hace que la acción
-       sea muy larga, además tiene una llave }
-       que no debe identificarse como el fin de la regla */
+                      printf("otra /* regla */"); /*
+                      con un comentario que hace que la acción
+                      sea muy larga, además tiene una llave }
+                      que no debe identificarse como el fin de la regla */
     }
 
 ["\t]	char a='}';
